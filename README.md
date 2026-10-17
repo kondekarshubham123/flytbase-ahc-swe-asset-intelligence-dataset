@@ -110,6 +110,10 @@ All configuration lives in `backend/app/config.py` and is overridable by env var
 All data is synthetic and created for this challenge; manuals and procedures are
 simplified, fictional documents, not real operating or legal guidance.
 
+## Test data
+
+`test-data/` holds the test dataset (`test-data/dataset/`), its release notes (`test-data/README.md`) and the final questions (`test-data/final-questions.md`).
+
 ## License
 
 [MIT](LICENSE)
