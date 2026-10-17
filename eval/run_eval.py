@@ -47,8 +47,10 @@ def configure_env(args: argparse.Namespace) -> None:
         os.environ["COPILOT_DB_PATH"] = str(Path(args.db_path).expanduser().resolve())
     if args.today:
         os.environ["COPILOT_TODAY"] = args.today
-    # The harness is intentionally LLM-free.
+    # The harness is intentionally LLM-free (works for any provider, including
+    # local Ollama which needs no API key).
     os.environ.pop("OPENROUTER_API_KEY", None)
+    os.environ["COPILOT_LLM_DISABLE"] = "1"
 
 
 def main() -> int:

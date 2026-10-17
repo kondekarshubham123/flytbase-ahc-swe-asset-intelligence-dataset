@@ -75,8 +75,8 @@ def _receipt(res: ToolResult, reply: Reply, visual_override: Optional[str]) -> N
 # ---------------------------------------------------------------------------
 _LLM_INTENTS = (
     "status", "current_status", "downtime", "temp_series", "spills", "spills_map",
-    "spills_heatmap", "cost", "rca", "compliance", "containment", "rule_search",
-    "doc_search",
+    "spills_heatmap", "well_locations", "cost", "rca", "compliance", "containment",
+    "rule_search", "doc_search",
 )
 
 
@@ -94,6 +94,7 @@ def _llm_refine(con, message: str, it: "I.Intent", as_of: date) -> "I.Intent":
         "'status' for a single well's up/down state, 'downtime' for days offline, "
         "'temp_series' for temperature over time, 'spills' for spill counts/volumes, "
         "'spills_map' for a map of spills, 'spills_heatmap' for spills by area/month, "
+        "'well_locations' for where wells are located (coordinates / a map of wells), "
         "'cost' for repair cost, 'rca' for root-cause analysis needs, "
         "'compliance' for broken rules, 'containment' for containment time, "
         "'rule_search'/'doc_search' for procedures and thresholds."
@@ -174,6 +175,7 @@ def _handle_question(con, user_id, session_id, message, it: I.Intent,
         "spills": _q_spills,
         "spills_map": _q_spills_map,
         "spills_heatmap": _q_spills_heatmap,
+        "well_locations": _q_well_locations,
         "cost": _q_cost,
         "rca": _q_rca,
         "compliance": _q_compliance,
@@ -279,6 +281,35 @@ def _q_current_status(con, user_id, session_id, message, it, asset_ids, area, as
         parts.append(f"- **{r['asset_id']}** ({r['well_type']}): Δ {r['delta_c']} °C{stale}. {rr}")
     parts.append("Where nothing explains the stop, the possible cause should be checked on site.")
     reply.text = "\n".join(parts)
+    return reply
+
+
+def _q_well_locations(con, user_id, session_id, message, it, asset_ids, area, as_of):
+    res = A.well_locations(con, area_id=area, asset_ids=asset_ids or None)
+    reply = Reply(text="", intent=it.as_dict())
+    _receipt(res, reply, it.visual or "map")
+    rows = res.data["rows"]
+    reply.focus = [r["asset_id"] for r in rows]
+    scope = (" " + resolve_area_name(con, area)) if area else ""
+
+    if not rows:
+        reply.text = f"I found no wells with recorded coordinates{scope}."
+        return reply
+
+    areas = sorted({r["area_name"] for r in rows if r["area_name"]})
+    bits = [f"**{len(rows)} well(s)**{scope}"]
+    if len(areas) > 1:
+        bits.append(f"across {len(areas)} areas ({', '.join(areas)})")
+    parts = [", ".join(bits) + ":"]
+
+    shown = rows if len(rows) <= 12 else rows[:12]
+    parts.append(", ".join(f"**{r['asset_id']}** ({r['lat']}, {r['lon']})" for r in shown))
+    if len(rows) > len(shown):
+        parts.append(f"…and {len(rows) - len(shown)} more — the map/table lists every coordinate.")
+    if area and rows[0].get("center_lat") is not None:
+        parts.append(f"{resolve_area_name(con, area)} centre: "
+                     f"{rows[0]['center_lat']}, {rows[0]['center_lon']}.")
+    reply.text = " ".join(parts)
     return reply
 
 

@@ -44,9 +44,9 @@
     }
   ],
   "last_inspection": {
-    "inspection_id": "INS-0180-0207",
-    "inspected_at": "2026-10-15T13:00:00Z",
-    "inspector_user_id": "U-203"
+    "inspection_id": "INS-0180-0220",
+    "inspected_at": "2027-01-14T12:45:00Z",
+    "inspector_user_id": "U-202"
   },
-  "recorded_status": "active"
+  "recorded_status": "down"
 }

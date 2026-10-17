@@ -89,6 +89,78 @@
       "name": "Chris Dalton",
       "role": "hse_officer",
       "team_id": "TEAM-HSE"
+    },
+    {
+      "user_id": "U-501",
+      "name": "Olivia Grant",
+      "role": "production_supervisor",
+      "team_id": "TEAM-SE"
+    },
+    {
+      "user_id": "U-502",
+      "name": "Marcus Lee",
+      "role": "field_inspector",
+      "team_id": "TEAM-SE"
+    },
+    {
+      "user_id": "U-503",
+      "name": "Hannah Brooks",
+      "role": "field_inspector",
+      "team_id": "TEAM-SE"
+    },
+    {
+      "user_id": "U-504",
+      "name": "Diego Ramirez",
+      "role": "field_operator",
+      "team_id": "TEAM-SE"
+    },
+    {
+      "user_id": "U-505",
+      "name": "Kayla Morgan",
+      "role": "field_operator",
+      "team_id": "TEAM-SE"
+    },
+    {
+      "user_id": "U-506",
+      "name": "Derek Walsh",
+      "role": "field_operator",
+      "team_id": "TEAM-SE"
+    },
+    {
+      "user_id": "U-601",
+      "name": "Nathan Pierce",
+      "role": "production_supervisor",
+      "team_id": "TEAM-NW"
+    },
+    {
+      "user_id": "U-602",
+      "name": "Rachel Dunn",
+      "role": "field_inspector",
+      "team_id": "TEAM-NW"
+    },
+    {
+      "user_id": "U-603",
+      "name": "Caleb Whitaker",
+      "role": "field_inspector",
+      "team_id": "TEAM-NW"
+    },
+    {
+      "user_id": "U-604",
+      "name": "Brandon Shaw",
+      "role": "field_operator",
+      "team_id": "TEAM-NW"
+    },
+    {
+      "user_id": "U-605",
+      "name": "Lauren Pruitt",
+      "role": "field_operator",
+      "team_id": "TEAM-NW"
+    },
+    {
+      "user_id": "U-606",
+      "name": "Austin Kemp",
+      "role": "field_operator",
+      "team_id": "TEAM-NW"
     }
   ]
 }

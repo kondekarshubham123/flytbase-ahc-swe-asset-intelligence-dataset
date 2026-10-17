@@ -6,6 +6,8 @@ const COLUMNS: { key: string; label: string }[] = [
   { key: "well_name", label: "Name" },
   { key: "area_name", label: "Area" },
   { key: "well_type", label: "Type" },
+  { key: "lat", label: "Lat" },
+  { key: "lon", label: "Lon" },
   { key: "inspected_at", label: "Date" },
   { key: "inspection_id", label: "Inspection" },
   { key: "wellhead_temp_c", label: "Wellhead °C" },
@@ -200,20 +202,23 @@ function MapView({ points }: { points: any[] }) {
   const x = (v: number) => P + ((v - minLon) / (maxLon - minLon || 1)) * (W - 2 * P);
   const y = (v: number) => H - P - ((v - minLat) / (maxLat - minLat || 1)) * (H - 2 * P);
   const maxBbl = Math.max(...points.map((p) => p.bbl || 0), 1);
+  const hasBbl = points.some((p) => (p.bbl ?? 0) > 0);
   return (
     <div className="chart">
       <svg viewBox={`0 0 ${W} ${H}`} className="svg-chart map">
         <rect x={P} y={P} width={W - 2 * P} height={H - 2 * P} fill="#0f1723" stroke="#2a3345" />
         {points.map((p, i) => (
           <g key={i}>
-            <circle cx={x(p.lon)} cy={y(p.lat)} r={6 + (p.bbl / maxBbl) * 8} fill="#ff7a59" fillOpacity={0.55} stroke="#ff7a59">
-              <title>{`${p.asset_id}: ${p.bbl} bbl on ${p.date}`}</title>
+            <circle cx={x(p.lon)} cy={y(p.lat)} r={hasBbl ? 6 + (p.bbl / maxBbl) * 8 : 6} fill="#ff7a59" fillOpacity={0.55} stroke="#ff7a59">
+              <title>{hasBbl
+                ? `${p.asset_id}: ${p.bbl} bbl on ${p.date}`
+                : `${p.asset_id}${p.area_name ? ` · ${p.area_name}` : ""} (${p.lat}, ${p.lon})`}</title>
             </circle>
             <text x={x(p.lon)} y={y(p.lat) - 12} fill="#dbe4f0" fontSize={10} textAnchor="middle">{p.asset_id}</text>
           </g>
         ))}
       </svg>
-      <div className="legend"><span>Pin size = spill volume (bbl)</span></div>
+      <div className="legend"><span>{hasBbl ? "Pin size = spill volume (bbl)" : "Pin = well location"}</span></div>
     </div>
   );
 }

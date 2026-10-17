@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Asset Intelligence Copilot - Solution Presentation</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/black.css">
+  <style>
+    .reveal h1, .reveal h2, .reveal h3 { text-transform: none; }
+    .reveal pre code { font-size: 0.8rem; line-height: 1.4; }
+    .reveal ul li { margin: 0.4rem 0; }
+    .reveal .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem; }
+    .reveal .card { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 10px; padding: 1rem; text-align: left; }
+    .reveal .card h4 { margin: 0 0 0.6rem 0; color: #fbbf24; font-size: 1rem; }
+    .reveal .card ul { margin: 0; padding-left: 1.2rem; font-size: 0.9rem; }
+    .reveal .footnote { font-size: 0.7rem; opacity: 0.7; margin-top: 1rem; }
+    .mermaid { background: #fff; border-radius: 10px; padding: 1rem; margin: 1rem auto; max-width: 95%; }
+  </style>
+</head>
+<body>
+  <div class="reveal">
+    <div class="slides">
+
+      <section>
+        <h2>Asset Intelligence Copilot</h2>
+        <h4>Evidence-Grounded Chat Assistant for Oil Well Operations</h4>
+        <p>Hacktoberfest 2026 · FlytBase Hack Day</p>
+        <p class="footnote">FastAPI • DuckDB • React + Vite • OpenRouter (optional)</p>
+      </section>
+
+      <section>
+        <h2>Problem Statement</h2>
+        <ul>
+          <li><strong>Data:</strong> 200 wells, inspections, maintenance, regulatory, notes, manuals & SOPs</li>
+          <li><strong>Need:</strong> Plain-English answers with citations & evidence</li>
+          <li><strong>Must:</strong> Deterministic arithmetic, two-level memory, honest about conflicts</li>
+          <li><strong>Goal:</strong> Work on unseen test dataset with generative UI</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Solution Overview</h2>
+        <div class="grid">
+          <div class="card"><h4>Backend</h4><ul><li>FastAPI + DuckDB</li><li>Semantic views apply corrections</li><li>Structured ToolResult</li><li>Optional cached LLM (re-parse only)</li></ul></div>
+          <div class="card"><h4>Frontend</h4><ul><li>React + Vite (TS)</li><li>card/table/line/bar/map/heatmap</li><li>Evidence + conflict cards</li><li>Pure SVG</li></ul></div>
+          <div class="card"><h4>Data Layer</h4><ul><li>Single DuckDB file</li><li>v_prod_status, v_downtime, v_spills, v_inspection_resolved, v_rule_effective</li><li>Assertions + report_facts</li></ul></div>
+        </div>
+        <div class="mermaid">
+flowchart TD
+  U[User] --> API[FastAPI /api]
+  API --> ORCH[Orchestrator]
+  ORCH --> INT[Intent Router]
+  ORCH --> TOOLS[Tools]
+  TOOLS --> DB[(DuckDB v_* Views)]
+  INT -->|"optional + cached"| LLM[OpenRouter/Gemma]
+  MEM[Memory Store] --> ORCH
+  DB --> TOOLS
+  API --> UI[Built Frontend /]
+        </div>
+      </section>
+
+      <section>
+        <h2>Why DuckDB?</h2>
+        <div class="grid">
+          <div class="card"><h4>Correctness</h4><ul><li>All arithmetic in SQL</li><li>Corrections in views</li><li>Single source of truth</li><li>Deterministic</li></ul></div>
+          <div class="card"><h4>Speed & Simplicity</h4><ul><li>In-process, zero-ops</li><li>~40k rows – instant</li><li>Rebuild via COPILOT_DATA_DIR</li></ul></div>
+          <div class="card"><h4>Domain Logic</h4><ul><li>Downtime = 7d per not-producing</li><li>Thresholds from extracted rules</li><li>Spill class/reportability in views</li></ul></div>
+        </div>
+        <p><strong>80/80 checks passed</strong> (scenarios + tools)</p>
+      </section>
+
+      <section>
+        <h2>Memory, Conflicts & Corrections</h2>
+        <div class="grid">
+          <div class="card"><h4>Two-Level Memory</h4><ul><li><strong>Shared:</strong> well-scope visible to all</li><li><strong>Private:</strong> "wells we discussed" per user</li></ul></div>
+          <div class="card"><h4>Corrections</h4><ul><li>Inspection-scope → propagate</li><li>Well-type overrides → scoped</li><li>Applied inside views</li></ul></div>
+          <div class="card"><h4>Honest Conflicts</h4><ul><li>Claim vs data surfaced</li><li>Unconfirmed if contradicting</li><li>Consequences explained</li></ul></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Complex Queries – How Solved</h2>
+        <ul>
+          <li><strong>Multi-source:</strong> Inspections • Maintenance • Notes • report_facts • Regulatory • Docs • Rules</li>
+          <li><strong>Windows:</strong> "last 90d", "last 13 weeks", "2025"</li>
+          <li><strong>Compliance/RCA:</strong> SR-01/02/03, RC-03/04 from computed state</li>
+          <li><strong>Visuals:</strong> SQL aggregates → SVG (card/table/line/bar/map/heatmap)</li>
+          <li><strong>Propagation:</strong> Corrections recompute reportability & obligations</li>
+        </ul>
+        <div class="mermaid">
+flowchart LR
+  Q[Query] --> P[Parse+Window+Resolve]
+  P --> T[Tool]
+  T --> SQL[SQL on v_*]
+  SQL --> E[Evidence+Conflicts+Visual]
+  E --> C[Compose+Cite]
+  C --> UI[Render]
+        </div>
+      </section>
+
+      <section>
+        <h2>Demo</h2>
+        <ul>
+          <li><strong>Q1:</strong> WELL-0001 status card + reasons + citations</li>
+          <li><strong>Q3:</strong> Line chart last 13 weeks with non-producing markers</li>
+          <li><strong>Q7:</strong> Spills map with volume-scaled pins</li>
+          <li><strong>Q8:</strong> 2026 heatmap by area/month</li>
+          <li><strong>Correction:</strong> Temp/spill volume propagate instantly</li>
+          <li><strong>RCA override:</strong> T350 threshold (2 vs 3) scoped correctly</li>
+        </ul>
+      </section>
+
+      <section>
+        <h2>Takeaway</h2>
+        <ul>
+          <li><strong>Compute, don't guess</strong> – SQL only; LLM thin + cached</li>
+          <li><strong>Views = consistency</strong> – logic centralized</li>
+          <li><strong>Evidence-grounded</strong> – cites record IDs</li>
+          <li><strong>Honest & scoped</strong> – conflicts surfaced, memory correct</li>
+          <li><strong>Fast & portable</strong> – in-process, no API key needed</li>
+          <li><strong>Proven</strong> – 80/80 deterministic checks</li>
+        </ul>
+        <p style="margin-top:1rem;"><strong>Computes. Cites. Shows.</strong></p>
+      </section>
+
+    </div>
+  </div>
+
+  <script type="module">
+    import Reveal from 'https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.esm.js';
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: false, theme: 'base' });
+    Reveal.initialize({ hash: true, slideNumber: true, controls: true, progress: true });
+    Reveal.addEventListener('ready', async () => {
+      const codes = document.querySelectorAll('.mermaid');
+      for (const code of codes) {
+        const pre = document.createElement('pre');
+        pre.className = 'mermaid';
+        pre.textContent = code.textContent;
+        code.replaceWith(pre);
+      }
+      await mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
+    });
+    Reveal.addEventListener('slidechanged', async () => {
+      await mermaid.run({ nodes: document.querySelectorAll('.mermaid') });
+    });
+  </script>
+</body>
+</html>

@@ -4,7 +4,16 @@
 > common US onshore practice. It is not a copy of any rule and is not legal or regulatory
 > guidance.
 
-Document ID: SOP-SR · Revision 4 · Owner: Health, Safety & Environment (TEAM-HSE)
+Document ID: SOP-SR · Revision 5 · Effective 1 Jan 2027 · Owner: Health, Safety & Environment (TEAM-HSE)
+
+## Revision history
+
+| Revision | In force for spills discovered | Change |
+|---|---|---|
+| 5 | from 1 Jan 2027 | SR-01 written notice deadline cut from 24 hours to **12 hours** |
+| 4 | before 1 Jan 2027 | SR-01 written notice within 24 hours |
+
+Use the revision that was in force on the date the spill was **discovered**.
 
 ## 1. Purpose
 
@@ -16,7 +25,8 @@ releases on well pads and along flowlines.
 - **Reporting:** state oil and gas regulators commonly require immediate notice of fires,
   leaks, spills and breaks, and a written report for crude oil losses of more than 5
   barrels. Texas Railroad Commission Statewide Rule 20 and its Form H-8 are an example. Our SR-01 keeps the
-  immediate phone call and adds a company deadline of 24 hours for the written notice.
+  immediate phone call and adds a company deadline for the written notice (12 hours from
+  revision 5; 24 hours before).
   Our reporting threshold (5 bbl or more) is slightly stricter than "more than 5 bbl".
 - **Cleanup:** Texas Statewide Rule 91 is an example cleanup standard for crude oil on
   land in non-sensitive areas. It requires free oil to be removed promptly, the
@@ -47,7 +57,7 @@ rules.
 
 | Protocol ID | Requirement |
 |---|---|
-| **SR-01** | For a **reportable or major** spill, phone the State Oil & Gas Commission immediately, then file the **written notice** (volume, affected area, cleanup plan) within **24 hours** of discovery, or within **2 hours** for a major spill. Discovery time is the time of the inspection that detected the spill. `hours_to_report` in the data is the time to the written notice. |
+| **SR-01** | For a **reportable or major** spill, phone the State Oil & Gas Commission immediately, then file the **written notice** (volume, affected area, cleanup plan) within **12 hours** of discovery (24 hours for spills discovered before 1 Jan 2027), or within **2 hours** for a major spill. Discovery time is the time of the inspection that detected the spill. `hours_to_report` in the data is the time to the written notice. |
 | **SR-02** | The source must be stopped and the spill contained within **4 hours** of discovery. |
 | **SR-03** | Contaminated soil must be cleaned to **1.0% TPH or less**. Take **at least 4 soil samples** to map the edges of a reportable spill. Haul soil above 5% TPH to an approved disposal site. For reportable and major spills, the remediation must be **verified within 60 days** of discovery; verification is closed only by a passing site inspection from the environmental agency. Smaller spills are cleaned to the same 1.0% TPH target without agency verification. |
 | **SR-04** | Every spill, including minor ones, must be recorded against the asset with an estimated volume and affected area. |

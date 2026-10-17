@@ -1,8 +1,10 @@
-"""Thin OpenRouter client with on-disk caching.
+"""Thin OpenAI-compatible chat client with on-disk caching.
 
-The copilot is designed to work with almost no model calls: the LLM is used only
-to (a) re-parse a question the deterministic router is unsure about, and
-(b) phrase an answer. Both are cached, so repeat runs (and the demo) cost nothing.
+Talks to any OpenAI-compatible provider: OpenRouter (hosted) or a local Ollama
+server — selected via ``config.LLM_PROVIDER``. The copilot is designed to work
+with almost no model calls: the LLM is used only to (a) re-parse a question the
+deterministic router is unsure about, and (b) phrase an answer. Both are cached,
+so repeat runs (and the demo) cost nothing.
 """
 from __future__ import annotations
 
@@ -46,7 +48,7 @@ def chat(messages: List[dict], con: Optional[duckdb.DuckDBPyConnection] = None,
     """Return the assistant text, or None if the LLM is unavailable."""
     if not available():
         return None
-    model = model or config.OPENROUTER_MODEL
+    model = model or config.LLM_MODEL
     key = _cache_key(model, messages)
     cached = _cache_get(con, key)
     if cached is not None:
@@ -58,12 +60,16 @@ def chat(messages: List[dict], con: Optional[duckdb.DuckDBPyConnection] = None,
         "temperature": temperature,
     }
     if json_mode:
-        payload["response_format"] = {"type": "json_object"}
+        if config.LLM_PROVIDER == "ollama":
+            # Ollama's OpenAI-compatible endpoint uses "format": "json".
+            payload["format"] = "json"
+        else:
+            payload["response_format"] = {"type": "json_object"}
     try:
         resp = httpx.post(
-            f"{config.OPENROUTER_BASE_URL}/chat/completions",
+            f"{config.LLM_BASE_URL}/chat/completions",
             headers={
-                "Authorization": f"Bearer {config.OPENROUTER_API_KEY}",
+                "Authorization": f"Bearer {config.LLM_API_KEY}",
                 "Content-Type": "application/json",
             },
             json=payload,
@@ -74,5 +80,12 @@ def chat(messages: List[dict], con: Optional[duckdb.DuckDBPyConnection] = None,
     except Exception as exc:  # network, rate limit, bad key — degrade gracefully
         print(f"[llm] unavailable ({exc}); falling back to the deterministic router")
         return None
+    if json_mode:
+        # Some models (esp. local ones) wrap JSON in markdown fences despite
+        # being asked for raw JSON — strip them so callers can json.loads().
+        stripped = text.strip()
+        if stripped.startswith("```"):
+            stripped = stripped.split("\n", 1)[-1].rsplit("```", 1)[0].strip()
+        text = stripped
     _cache_put(con, key, text)
     return text

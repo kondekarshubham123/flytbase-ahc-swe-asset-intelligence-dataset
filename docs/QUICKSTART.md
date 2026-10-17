@@ -68,7 +68,9 @@ backend/.venv/bin/python eval/run_eval.py --data-dir /absolute/path/to/test-data
 
 ## 7) LLM (optional)
 
-Copy `.env.example` to `.env` and set `OPENROUTER_API_KEY`. Without it, the system is fully deterministic. Model calls are cached in `llm_cache`.
+Copy `.env.example` to `.env` and either set `OPENROUTER_API_KEY`, or set
+`LLM_PROVIDER=ollama` to use a local Ollama model (e.g. `gemma3:4b`, no key needed).
+Without either, the system is fully deterministic. Model calls are cached in `llm_cache`.
 
 ## Tips
 

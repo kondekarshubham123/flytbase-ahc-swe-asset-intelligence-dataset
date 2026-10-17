@@ -280,6 +280,51 @@ def current_status(con: duckdb.DuckDBPyConnection, area_id: Optional[str] = None
     return res
 
 
+# ---------------------------------------------------------------------------
+# Well locations  ("give me the locations of all wells in <area>")
+# ---------------------------------------------------------------------------
+def well_locations(con: duckdb.DuckDBPyConnection, area_id: Optional[str] = None,
+                   asset_ids: Optional[List[str]] = None) -> ToolResult:
+    """Coordinates for wells, optionally scoped to an area or a set of wells."""
+    where = ["w.lat IS NOT NULL", "w.lon IS NOT NULL"]
+    params: list = []
+    if area_id:
+        where.append("w.area_id = ?")
+        params.append(area_id)
+    if asset_ids:
+        where.append(f"w.asset_id IN ({','.join('?' for _ in asset_ids)})")
+        params += asset_ids
+
+    rows = _rows(
+        con,
+        f"""
+        SELECT w.asset_id, w.name AS well_name, w.area_id, a.name AS area_name,
+               a.center_lat, a.center_lon, w.well_type, w.team_id,
+               ROUND(w.lat, 5) AS lat, ROUND(w.lon, 5) AS lon, w.recorded_status
+        FROM wells w
+        LEFT JOIN areas a ON a.area_id = w.area_id
+        WHERE {' AND '.join(where)}
+        ORDER BY w.area_id, w.asset_id
+        """,
+        params,
+    )
+    res = ToolResult("well_locations", data={"rows": rows, "count": len(rows),
+                                             "area_id": area_id})
+    res.visual = {"type": "map", "spec": {"points": [
+        {"asset_id": r["asset_id"], "lat": r["lat"], "lon": r["lon"],
+         "area_name": r["area_name"], "well_type": r["well_type"]}
+        for r in rows
+    ]}}
+    for r in rows:
+        res.add_evidence(Evidence(
+            "record", r["asset_id"],
+            f"{r['asset_id']} location",
+            detail=f"{r['lat']}, {r['lon']} · {r['area_name'] or 'unassigned'} · "
+                   f"{r['well_type']}",
+        ))
+    return res
+
+
 def temp_series(con: duckdb.DuckDBPyConnection, asset_id: str,
                 start: Optional[date] = None, end: Optional[date] = None) -> ToolResult:
     where = ["asset_id = ?"]

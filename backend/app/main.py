@@ -61,7 +61,8 @@ def health() -> Dict[str, Any]:
         "today": config.TODAY.date().isoformat(),
         "data_dir": str(config.DATA_DIR),
         "llm_enabled": config.LLM_ENABLED,
-        "model": config.OPENROUTER_MODEL if config.LLM_ENABLED else None,
+        "model": config.LLM_MODEL if config.LLM_ENABLED else None,
+        "provider": config.LLM_PROVIDER if config.LLM_ENABLED else None,
     }
 
 
@@ -89,7 +90,8 @@ def bootstrap(user_id: Optional[str] = None) -> Dict[str, Any]:
     return {
         "today": config.TODAY.date().isoformat(),
         "llm_enabled": config.LLM_ENABLED,
-        "model": config.OPENROUTER_MODEL if config.LLM_ENABLED else None,
+        "model": config.LLM_MODEL if config.LLM_ENABLED else None,
+        "provider": config.LLM_PROVIDER if config.LLM_ENABLED else None,
         "stats": summary(c),
         "users": users,
         "areas": areas,

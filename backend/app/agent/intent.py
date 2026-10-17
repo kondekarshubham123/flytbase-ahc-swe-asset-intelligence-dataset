@@ -31,8 +31,9 @@ VISUAL_WORDS = {
 class Intent:
     action: str = "ask"            # ask | correct_raw | correct_analysis | well_type_rule | share_knowledge
     intent: str = "unknown"        # status | current_status | downtime | temp_series | spills |
-                                   # spills_map | spills_heatmap | cost | rca | compliance |
-                                   # containment | rule_search | doc_search | reference_followup
+                                   # spills_map | spills_heatmap | well_locations | cost | rca |
+                                   # compliance | containment | rule_search | doc_search |
+                                   # reference_followup
     asset_ids: List[str] = field(default_factory=list)
     area: Optional[str] = None
     window: Dict[str, Any] = field(default_factory=dict)
@@ -154,8 +155,15 @@ def classify_question(text: str) -> str:
         return "containment"
     if _has(t, "heatmap", "heat map"):
         return "spills_heatmap"
-    if _has(t, "map") and _has(t, "spill"):
+    if _has(t, "spill") and _has(t, "map", "location", "locations", "where"):
         return "spills_map"
+    # Well locations: explicit location words, or a map that is not about spills.
+    if _has(t, "location", "locations", "coordinate", "coordinates", "latitude",
+            "longitude", "geographic", "where are the wells", "where are wells",
+            "where is well", "where's well", "locate the wells", "locate wells"):
+        return "well_locations"
+    if _has(t, "map"):
+        return "well_locations"
     if _has(t, "cost", "spend", "spent", "paid"):
         return "cost"
     # A temperature question (often "wellhead temperature against air temperature").

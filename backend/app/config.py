@@ -36,13 +36,41 @@ if TODAY.tzinfo is None:  # pragma: no cover
     TODAY = TODAY.replace(tzinfo=timezone.utc)
 
 # --- LLM -------------------------------------------------------------------
+# Two providers are supported out of the box, both behind the OpenAI-compatible
+# /chat/completions API shape:
+#   * "openrouter" (default) — hosted; needs OPENROUTER_API_KEY.
+#   * "ollama"               — local models via Ollama's OpenAI-compatible API
+#                              (http://localhost:11434/v1); no key needed.
+LLM_PROVIDER = os.environ.get("LLM_PROVIDER", "openrouter").lower()
+
 OPENROUTER_API_KEY = os.environ.get("OPENROUTER_API_KEY", "")
 OPENROUTER_BASE_URL = os.environ.get("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
 OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "google/gemma-4-31b-it:free")
-# When no key is configured the system runs fully deterministically (keyword + SQL
-# routing only). This is what keeps the copilot alive on a rate-limited free tier.
-LLM_ENABLED = bool(OPENROUTER_API_KEY)
+
+OLLAMA_BASE_URL = os.environ.get("OLLAMA_BASE_URL", "http://localhost:11434/v1")
+OLLAMA_MODEL = os.environ.get("OLLAMA_MODEL", "gemma3:4b")
+
+if LLM_PROVIDER == "ollama":
+    LLM_BASE_URL = os.environ.get("LLM_BASE_URL", OLLAMA_BASE_URL)
+    LLM_MODEL = os.environ.get("LLM_MODEL", OLLAMA_MODEL)
+    # Ollama ignores auth, but the HTTP client always sends a Bearer header.
+    LLM_API_KEY = os.environ.get("LLM_API_KEY", "ollama")
+    # Enabled by default; if Ollama isn't running, calls degrade gracefully to
+    # the deterministic router (see agent/llm.py).
+    LLM_ENABLED = True
+else:
+    LLM_BASE_URL = os.environ.get("LLM_BASE_URL", OPENROUTER_BASE_URL)
+    LLM_MODEL = os.environ.get("LLM_MODEL", OPENROUTER_MODEL)
+    LLM_API_KEY = os.environ.get("LLM_API_KEY", OPENROUTER_API_KEY)
+    # When no key is configured the system runs fully deterministically (keyword +
+    # SQL routing only). This is what keeps the copilot alive on a rate-limited
+    # free tier.
+    LLM_ENABLED = bool(LLM_API_KEY)
 LLM_TIMEOUT_S = float(os.environ.get("COPILOT_LLM_TIMEOUT", "40"))
+# Hard off-switch for the LLM layer regardless of provider (used by the eval
+# harness, which must run the deterministic pipeline only).
+if os.environ.get("COPILOT_LLM_DISABLE", "").lower() in ("1", "true", "yes"):
+    LLM_ENABLED = False
 
 # --- Reporting units -------------------------------------------------------
 DOWNTIME_DAYS_PER_INSPECTION = 7  # per the Dataset Guide

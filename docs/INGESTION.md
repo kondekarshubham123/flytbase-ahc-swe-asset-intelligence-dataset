@@ -54,7 +54,9 @@ backend/.venv/bin/python eval/run_eval.py --data-dir /path/to/test-data --today 
 | `COPILOT_DATA_DIR` | Dataset root (default `sample-data/`) |
 | `COPILOT_DB_PATH` | DuckDB path (default `backend/data/copilot.duckdb`) |
 | `COPILOT_TODAY` | ISO datetime for "today" (default `2026-10-16T00:00:00+00:00`) |
-| `OPENROUTER_API_KEY` | Optional; enables LLM layer (otherwise deterministic) |
+| `LLM_PROVIDER` | `openrouter` (default) or `ollama` |
+| `OPENROUTER_API_KEY` | Optional; enables LLM layer on OpenRouter (otherwise deterministic) |
 | `OPENROUTER_MODEL` | Model slug (default `google/gemma-4-31b-it:free`) |
+| `OLLAMA_BASE_URL` / `OLLAMA_MODEL` | Local Ollama endpoint (default `http://localhost:11434/v1`) and model (default `gemma3:4b`) |
 | `COPILOT_LLM_TIMEOUT` | Timeout seconds (default `40`) |
 | `COPILOT_CACHE_DIR` | Cache dir (default `backend/data/cache`) |

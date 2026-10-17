@@ -44,9 +44,11 @@
     }
   ],
   "last_inspection": {
-    "inspection_id": "INS-0146-0096",
-    "inspected_at": "2026-10-15T10:00:00Z",
-    "inspector_user_id": "U-204"
+    "inspection_id": "INS-0146-0103",
+    "inspected_at": "2026-12-03T11:45:00Z",
+    "inspector_user_id": "U-202"
   },
-  "recorded_status": "active"
+  "recorded_status": "plugged",
+  "status": "plugged_and_abandoned",
+  "decommissioned_on": "2026-12-10"
 }
