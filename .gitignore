@@ -4,3 +4,28 @@ prototype/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+
+# Secrets / local config
+.env
+backend/.env
+
+# Local database (rebuilt from sample-data with `python -m app.ingest.loader`)
+backend/data/
+*.duckdb
+*.duckdb.wal
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Editor
+.idea/
+.vscode/
